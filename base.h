@@ -1,9 +1,8 @@
-
-
+#include <stdio.h>
 
 typedef enum {red, black} colore;
 struct rbnode {
-	char* nome;
+	int x,y;
 	colore c;                          /* Colore del nodo */
 	struct rbnode *left, *right, *up;  /* Puntatori ai due figli e al padre */
 }; 
@@ -12,16 +11,46 @@ typedef struct rbnode rbnode;
 
 typedef struct {
 	rbnode *root, *nil;
+	int perimetro,ordine, count;
+	int xdown, xup, ydown, yup
 } rbtree;
+
+typedef struct {
+	int v;                      
+	struct searchtree *left, *right, *up;  /* Puntatori ai due figli e al padre */
+}searchtree ; 
+
+
+
+
+
+
+// procedure richieste
+rbtree* nuovo();
+int ordine(rbtree* p);
+
+
+
+void visualizza_elementare(rbtree *p);
+
 
 
 rbtree *createrbtree();
 void stampa(rbtree *p);
-void rbinsert(rbtree *p, char *nome);
-void rbinsert(rbtree *p, char *nome);
+void rbinsert(rbtree *p, int x, int y);
+int perimetro(rbtree *p);
+// void rbinsert(rbtree *p, char *nome);
 // void rbdelete(rbtree *r, rbnode *q);
-// rbnode *search(rbtree *p, char *nome);
+rbnode *search(rbtree *p, int x, int y);
 
 //procedure di utilità
 
 int is_lower_than(int xa, int ya, int xb, int yb);
+int* get_admitted_positions(int x, int y);
+
+
+///TEST STRUCTURES
+typedef struct {
+	int x;
+    int y;
+} element;

@@ -4,7 +4,8 @@
 #include "base.h"
 #include <string.h>
 
-/* Creazione dell'albero red-black */
+#define MAX(a, b) ((a) < (b) ? (b) : (a))
+/* Creazione Albero Mosaico*/
 rbtree *createrbtree()
 {
 	rbtree *t = (rbtree*) malloc(sizeof(rbtree));
@@ -23,33 +24,85 @@ rbtree *createrbtree()
 	return t;
 }
 
+searchtree *createsearchtree()
+{
+	searchtree *t = (searchtree*) malloc(sizeof(searchtree));
+
+	if(!t) {
+		fprintf(stderr,"Errore di allocazione A\n");
+        	exit(-1);
+	}
+	return t;
+}
+
+searchtree *insert(searchtree *p,int k) { 
+	
+	searchtree *q = malloc(sizeof(searchtree)); 
+	searchtree *r = p; 
+	searchtree *s = NULL; 
+	if(!q) { /* errore */} 
+	q->v = k; 
+	q->left = q->right = NULL; 
+	while(r) { 
+		s = r; 
+		if (k < r->v){
+			// r = r->left;
+		}
+			// 
+		else {
+			
+		}
+		// r = r->right;
+			
+		// r = k < r->v ? r->left : r->right; 
+	} 
+	q->up = s; 
+	if(!s) return q; 
+	
+	if(k < s->v) s->left = q; 
+	else s->right = q; 
+	
+	
+	return (searchtree*) p; 
+} 
+
+searchtree *searchbs(searchtree *p, int k) 
+{ 
+	if(!p || k == p->v) 
+		return p; 
+	return searchbs(k < p->v ? p->left : p->right, k); 
+} 
+
+
+
+
 /* Visita in ordine dell'albero per la stampa in ordine alfabetico */
 void inorder(rbnode *p, rbnode *nil)
 {
 	if(p != nil) {
-        	inorder(p->left,nil);
-        	printf("%s %d", p->nome, p->c);
+        	inorder(p->right,nil);
+        	printf("(%d,%d) ", p->x, p->y);
         	// if(p->t == palazzo){
         	//                     printf("palazzo\n");
         	//                     } else {
         	//                            printf("giardino\n");
         	//                            }
-        	inorder(p->right,nil);
+        	inorder(p->left,nil);
 	}
 }
 
-void stampa(rbtree *p)
+void visualizza_elementare(rbtree *p)
 {
 	inorder(p->root, p->nil);
 }
 
 /* Ricerca il nodo che ha come nome il nome passato come parametro */
-rbnode *search(rbtree *r, char *nome)
+rbnode *search(rbtree *r, int x, int y)
 {
 	rbnode *p = r->root;
 
-	while(p != r->nil && strcmp(nome, p->nome) !=0)
-	        if(strcmp(nome, p->nome) < 0)
+	while(p != r->nil && is_lower_than(x,y, p->x,p->y) !=0)
+	        if(is_lower_than(x,y, p->x,p->y) < 0)
 	                  p = p->left;
                       else
                       p = p->right;
@@ -95,7 +148,7 @@ void rightrotate(rbtree *r, rbnode *x)
 }				
 
 /* Inserimento del singolo nodo, con valorizzazione di tutti i campi del nodo */
-rbnode *simpleinsert(rbtree *tree, char *nome)
+rbnode *simpleinsert(rbtree *tree, int x, int y)
 {
 	rbnode *q = (rbnode*) malloc(sizeof(rbnode));
 	rbnode *r = tree->root;
@@ -105,42 +158,70 @@ rbnode *simpleinsert(rbtree *tree, char *nome)
 		fprintf(stderr,"Errore di allocazione C\n");
         	exit(-4);
 	}
-	q->nome = (char*) malloc(sizeof(nome));
-	sprintf(q->nome, "%s", nome);
-	// q->coord[0] = coord[0];
-	//     q->coord[1] = coord[1];
-	//     q->coord[2] = coord[2];
-	//     q->coord[3] = coord[3];
-	//     q->coord[4] = coord[4];
-	//     q->coord[5] = coord[5];
-	//     q->t = t;
+	
+	q->x = x;
+	q->y = y;
+
 	q->left = q->right = tree->nil;
 	q->c = red;
+	
 	while(r != tree->nil) {                /* Controllo dove va inserito il nuovo nodo */
+		
 		s = r;
-		if (strcmp(nome, r->nome) < 0){
+		if (is_lower_than(x,y, r->x, r->y) < 0){
 		   r = r->left;
         }
-		else {
-             r = r->right;                  
-             }
-        }
-	q->up = s;
+		else{
+			if (is_lower_than(x,y, r->x, r->y) == 0)
+				return -1;
+             r = r->right;
+        }                  
+      }
+	   q->up = s;
+  
+
 	if(s == tree->nil)
 		tree->root = q;
 	else{
-       if(strcmp(nome, s->nome) < 0)
+		
+       if(is_lower_than(x,y, s->x, s->y) < 0)
            s->left = q;
-	   else
+		else{
+			if (is_lower_than(x,y, s->x, s->y) == 0)
+				return -1;
    	       s->right = q;
-	}return q;
+		}
+	}
+	
+	tree->count=tree->count +1;
+	
+	int* positions = get_admitted_positions(x,y);
+	int collisions = 0;
+	for(size_t i = 0; i < 7; i = i+2 )
+	{
+		rbnode *rnode = search(tree,positions[i],positions[i+1]);
+		if (rnode){
+			// printf("trovata collisione il nodo (%d,%d) collide con (%d,%d) \n ",x,y, positions[i],positions[i+1]);
+			collisions = collisions +1;
+		}
+	}
+	
+	
+	if (x<0 && x< tree->xdown) tree->xdown = x;
+	if (x>0 && x> tree->xup) tree->xup = x;
+	if (y<0 && y< tree->ydown) tree->ydown = y;
+	if (y>0 && y> tree->yup) tree->yup = y;
+	tree->ordine = 1+ MAX(tree->xup - tree->xdown,tree->yup - tree->ydown);
+	tree->perimetro= (tree->perimetro+4) -(collisions*2);
+	return q;
 }
 
 /* Inserimento di un nuovo elemento nell'albero */
-void rbinsert(rbtree *tree, char *nome)
+void rbinsert(rbtree *tree, int xa, int ya)
 {
-	rbnode *x = simpleinsert(tree, nome);
-	
+	rbnode *x = simpleinsert(tree, xa, ya);
+	if (!x){
+		
 	while(x != tree->root && x->up->c == red) {     /* Finchè x non è la radice e il padre è red */
 		if(x->up == x->up->up->left) {              /* Se il padre di x è uguale al figlio sinistro di suo nonno, cioè il padre di x */
 			rbnode *y = x->up->up->right;           /* y è uguale allo zio di x */
@@ -177,6 +258,7 @@ void rbinsert(rbtree *tree, char *nome)
 		}
 	}
 	tree->root->c = black;                          /* il colore della root è black */
+	}
 }
 
 /* Controllo se le proprietà dopo la cancellazione vanno bene */
@@ -235,66 +317,73 @@ void fixup(rbtree *tree, rbnode *x)
 	}
 	x->c = black;
 }
-// 
-// /* Cancellazione di un elemento dell'albero */
-// void rbdelete(rbtree *tree, rbnode *q)
-// {
-// 	rbnode *r, *s;
-//     
-// 	if(q->left == tree->nil || q->right == tree->nil)
-// 		r = q;
-// 	else {
-//          r = q->right;
-//          while (r->left != tree->nil)
-//                         r = r->left;
-//          }
-// 	if(r->left != tree->nil)
-// 	           s = r->left;
-//     else
-//         s = r->right;
-//     s->up = r->up;
-// 	if(r->up)
-//              if(r == r->up->left)
-//          r->up->left = s;
-//              else
-// 			      r->up->right = s;
-// 	else
-//         tree->root = s;		      
-// 	if(r != q)
-// 	    q->nome = (char*) malloc(sizeof(r->nome)); 
-// 		sprintf(q->nome, "%s", r->nome);
-//         // q->coord[0] = r->coord[0];
-//         //  q->coord[1] = r->coord[1];
-//         //  q->coord[2] = r->coord[2];
-//         //  q->coord[3] = r->coord[3];
-//         //  q->coord[4] = r->coord[4];
-//         //  q->coord[5] = r->coord[5];
-//         //  q->t = r->t;
-// 	if(r->c == black)
-// 		fixup(tree, s);
-// 	free(r);
-// }
-// 
+ 
+/*
+
+FUNZIONI RICHIESTE 
+
+*/
+
+
+rbtree* nuovo(){
+	rbtree* mosaico = createrbtree();
+	mosaico->count = 0;
+	mosaico->xdown=0;
+		mosaico->yup=0;
+			mosaico->ydown=0;
+				mosaico->yup=0;
+	rbinsert(mosaico,0,0);
+	mosaico->perimetro = 4;
+	return mosaico;
+}
+
+int perimetro(rbtree *p){
+	return p->perimetro;
+}
+
+int ordine(rbtree* p){
+	return p->ordine;
+}
+/*
+
+FUNZIONI DI UTILTIA
+
+*/
+
+int* get_admitted_positions(int x, int y){
+	int* positions = (int*) calloc(8, sizeof(int));
+	positions[0] = x;
+	positions[1] = y+1;
+	positions[2] = x-1;
+	positions[3] = y;
+	positions[4] = x+1;
+	positions[5] = y;
+	positions[6] = x;
+	positions[7] = y-1;
+	
+	return positions;
+}
 int is_lower_than(int xa, int ya, int xb, int yb){
-	if(ya > yb){
-	
+	if(ya > yb)
+		return -1;
+	if(ya == yb && xa < xb)
+		return -1;
+	if(ya > yb)
+		return 0;
+	if((ya == yb && xa > xb) || ya < yb)
 		return 1;
-	}else 
-	if((ya == yb)){
-	
-		if (xa < xb){
-			
-		    return 1;	
-		}else {
-			return 0;
-		}
-		
-	} else {
-		if (xa <= xb){
+	return 0; // sono uguali
+}
 
-		    return 1;	
-		}
 
-    }
-	return 0;
+
+
+void inorderforTest(rbnode *p, rbnode *nil)
+{
+
+	if(p != nil) {
+        	inorderforTest(p->left,nil);
+				
+        	inorderforTest(p->right,nil);
+	}
 }
