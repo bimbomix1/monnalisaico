@@ -5,6 +5,8 @@
 #include <string.h>
 
 #define MAX(a, b) ((a) < (b) ? (b) : (a))
+int **grid;
+int xup,xdown,yup,ydown;
 /* Creazione Albero Mosaico*/
 rbtree *createrbtree()
 {
@@ -24,54 +26,23 @@ rbtree *createrbtree()
 	return t;
 }
 
-searchtree *createsearchtree()
-{
-	searchtree *t = (searchtree*) malloc(sizeof(searchtree));
 
-	if(!t) {
-		fprintf(stderr,"Errore di allocazione A\n");
-        	exit(-1);
-	}
-	return t;
-}
 
-searchtree *insert(searchtree *p,int k) { 
-	
-	searchtree *q = malloc(sizeof(searchtree)); 
-	searchtree *r = p; 
-	searchtree *s = NULL; 
-	if(!q) { /* errore */} 
-	q->v = k; 
-	q->left = q->right = NULL; 
-	while(r) { 
-		s = r; 
-		if (k < r->v){
-			// r = r->left;
-		}
-			// 
-		else {
-			
-		}
-		// r = r->right;
-			
-		// r = k < r->v ? r->left : r->right; 
-	} 
-	q->up = s; 
-	if(!s) return q; 
-	
-	if(k < s->v) s->left = q; 
-	else s->right = q; 
-	
-	
-	return (searchtree*) p; 
-} 
 
-searchtree *searchbs(searchtree *p, int k) 
-{ 
-	if(!p || k == p->v) 
-		return p; 
-	return searchbs(k < p->v ? p->left : p->right, k); 
-} 
+// searchtree *searchbs(searchtree *p, int k) 
+// { 
+// 	if(!p || k == p->v) 
+// 		return p; 
+// 	return searchbs(k < p->v ? p->left : p->right, k); 
+// } 
+
+// void inorderbs(searchtree *p, void (*op)(searchtree *)) { 
+// if(p) { 
+// inorderbs(p->left,op); 
+// printf("%d",p->v);
+// inorderbs(p->right,op); 
+// } 
+// } 
 
 
 
@@ -80,14 +51,9 @@ searchtree *searchbs(searchtree *p, int k)
 void inorder(rbnode *p, rbnode *nil)
 {
 	if(p != nil) {
-        	inorder(p->right,nil);
-        	printf("(%d,%d) ", p->x, p->y);
-        	// if(p->t == palazzo){
-        	//                     printf("palazzo\n");
-        	//                     } else {
-        	//                            printf("giardino\n");
-        	//                            }
         	inorder(p->left,nil);
+			printf("(%d,%d) ", p->x, p->y);
+            inorder(p->right,nil);
 	}
 }
 
@@ -96,6 +62,54 @@ void visualizza_elementare(rbtree *p)
 	inorder(p->root, p->nil);
 }
 
+void inorderadv(int **grid, rbnode *p, rbnode *nil)
+{
+	if(p != nil) {
+		inorderadv(grid,p->left,nil);
+		int cordx = xdown <0 ? p->x -xdown : p->x;
+		int cordy = ydown <0 ? p->y -ydown : p->y;
+		grid[cordx][cordy] = 1;
+		inorderadv(grid,p->right,nil);		
+	}
+}
+void visualizza_avanzata(rbtree *p)
+{	
+	// return -1 if memory error
+	
+	int **grid;
+	int ordine = p->ordine, cordx, cordy;
+	xup = p->xup;
+	xdown = p->xdown;
+	yup = p->yup;
+	ydown = p->ydown;
+	
+	// allocazione struttura disegno mosaico 
+	grid = malloc(ordine * sizeof(int *));
+	if(grid == NULL) return 1;
+	for(int i = 0; i <= ordine; i++){
+		grid[i] = malloc(ordine * sizeof(int));
+			if(grid[i] == NULL)
+				return -1;
+	}
+	
+	inorderadv(grid,p->root, p->nil);
+	for(int y = ordine; y >= 0; --y)
+	{
+		for(int x = 0; x < ordine; ++x)
+		{
+			if (grid[x][y] == 1){
+				cordx = xdown <0 ?  x+ xdown : x;
+				cordy = ydown <0 ?  y+ ydown : y;
+				if (cordx == 0 && cordy == 0 )
+					printf("0");
+				else
+					printf("X");
+			}else
+			printf(" ");
+		}
+		printf("\n");
+	}
+}
 /* Ricerca il nodo che ha come nome il nome passato come parametro */
 rbnode *search(rbtree *r, int x, int y)
 {
@@ -329,9 +343,9 @@ rbtree* nuovo(){
 	rbtree* mosaico = createrbtree();
 	mosaico->count = 0;
 	mosaico->xdown=0;
-		mosaico->yup=0;
-			mosaico->ydown=0;
-				mosaico->yup=0;
+	mosaico->yup=0;
+	mosaico->ydown=0;
+	mosaico->yup=0;
 	rbinsert(mosaico,0,0);
 	mosaico->perimetro = 4;
 	return mosaico;

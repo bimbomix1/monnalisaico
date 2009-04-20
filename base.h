@@ -12,13 +12,11 @@ typedef struct rbnode rbnode;
 typedef struct {
 	rbnode *root, *nil;
 	int perimetro,ordine, count;
-	int xdown, xup, ydown, yup
-} rbtree;
+	int xdown, xup, ydown, yup;
+}rbtree;
 
-typedef struct {
-	int v;                      
-	struct searchtree *left, *right, *up;  /* Puntatori ai due figli e al padre */
-}searchtree ; 
+
+
 
 
 
@@ -39,6 +37,7 @@ rbtree *createrbtree();
 void stampa(rbtree *p);
 void rbinsert(rbtree *p, int x, int y);
 int perimetro(rbtree *p);
+int ordine(rbtree *p);
 // void rbinsert(rbtree *p, char *nome);
 // void rbdelete(rbtree *r, rbnode *q);
 rbnode *search(rbtree *p, int x, int y);
