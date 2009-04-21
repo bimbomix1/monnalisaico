@@ -11,12 +11,6 @@ mosaico: base.o mosaico.o
 base: base.o
 	gcc $(CFLAGS) base.c -o base.o
 
-
-test_structure:  test_structure.o structure.o 
-	gcc $(CFLAGS) $(OBJECTS_TEST)  cgreen/cgreen.a -o test_structur.o
-	./test_structur.o
-
-
 test_base:  test_base.o base.o
 		gcc $(CFLAGS) base.o test_base.o cgreen/cgreen.a -o test_base_structure.o
 		./test_base_structure.o

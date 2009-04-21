@@ -7,7 +7,153 @@
 #define MAX(a, b) ((a) < (b) ? (b) : (a))
 int **grid;
 int xup,xdown,yup,ydown;
+bst adm_positions;
+
+bst BSTinit( void );                           /* inizializza un BST vuoto */
+int BSTcount( bst );                           /* conta gli elementi di un BST */
+bst BSTinsert( bst, int, int );                    /* inserisce un nuovo nodo nel BST */
+void BSTdisplay( bst );                        /* visualizza in bella forma il contenuto e la struttura del BST */
+
+
+
+
+
+/* crea un nuovo nodo dell'albero, dati in input il record che deve contenere e i link ai due figli */
+
+bst NEW( int x,int y, bst sx, bst dx ) { 
+  bst b = malloc( sizeof( struct BST ) );
+b->x = x;b->y = y; b->sx = sx; b->dx = dx;
+  return b;
+}
+
+
+bst BSTinit( void ) { return NULL; }
+
+int BSTcount( bst b ) {
+  if ( b == NULL ) return 0;
+  return 1 + BSTcount( b->sx ) + BSTcount( b->dx );
+}
+
+bst rotDX( bst b ) {
+  bst x = b->sx; b->sx = x->dx; x->dx = b;
+  return x;
+}
+
+bst rotSX( bst b ) {
+  bst x = b->dx; b->dx = x->sx; x->sx = b;
+  return x;
+}
+
+bst BSTinsertInRoot( bst b, int x, int y ) {
+  if ( b == NULL ) return NEW( x,y, NULL, NULL );
+ 
+  if (is_lower_than(x,y, b->x, b->y) <0) {
+    b->sx = BSTinsert( b->sx, x ,y );
+    b = rotDX( b );
+  }
+  else {
+    b->dx = BSTinsert( b->dx, x,y);
+    b = rotSX( b );
+  }
+  return b;
+}
+
+/* inserimento: versione ricorsiva */
+bst BSTinsert( bst b, int x, int y ) {
+  if ( b == NULL ) return NEW( x,y, NULL, NULL );
+  if (rand() < RAND_MAX/(BSTcount( b )+1)){
+	// printf("inserimento %d",x);
+				//printf("inserimento in radice per numero %d size %d \n",x,size);
+			return BSTinsertInRoot(b,x,y);
+  }
+  if (is_lower_than(x,y, b->x, b->y) <0) b->sx = BSTinsert( b->sx, x,y );
+  else b->dx = BSTinsert( b->dx, x,y );
+  return b;
+}
+
+
+int BSTsearch( bst b, int x, int y ) {
+  if ( b == NULL ){
+    return 0;
+  }
+    if ( b->x == x && b->y == y){
+	return 1;
+	}
+    if ( is_lower_than(x,y, b->x,b->y) < 0) {	
+		return BSTsearch( b->sx, x,y );
+    }else{
+	 	return BSTsearch( b->dx, x,y );
+	
+	}
+}
+
+
+
+bst removeNode( bst b, bst f ) {
+  bst v;
+  if ( b->sx != NULL ) v = b->sx;
+  else v = b->dx;
+  if ( f ) {
+    if ( f->sx == b ) f->sx = v;
+    else f->dx = v;
+  }
+  free( b );
+  return v;
+} 
+
+
+bst deleteNode( bst b, int x,int y , bst father ) {
+  if ( b == NULL ) return b;
+  if ( is_lower_than(x,y,b->x,b->y )) b->sx = deleteNode( b->sx, x,y, b );
+  if ( is_lower_than(y,x,b->y,b->x )) b->sx = deleteNode( b->sx, x,y, b );
+  if ( x == b->x && y == b->y) {
+    if ( ( b->sx == NULL ) || ( b->dx == NULL ) ) b = removeNode( b, father );
+    else {
+      bst m = b->sx, f = b;
+      while ( m->dx ) { f = m; m = m->dx; }
+      b->x = m->x;
+      m = removeNode( m, f );
+    }
+  }
+  return b;
+}
+
+bst BSTdelete( bst b, int x, int y ) { return deleteNode( b, x,y, NULL ); }
+
+int BSTGetRootX(bst b){
+	return b->x;
+}
+int BSTGetRootY(bst b){
+	return b->y;
+}
+
+void BSTdisplay( bst b ) {
+  int i;
+  static int prof = 0;
+  if ( b == NULL ) return ;
+  prof++;
+  BSTdisplay( b->sx );
+  for ( i = 0; i < prof; i++ ) printf( "    " );
+  printf("(%d,%d)", b->x, b->y );
+  printf( "\n" );
+  BSTdisplay( b->dx );
+  prof--;
+}
+
+void BSTdisplayInOrder( bst b ) {
+
+  if ( b == NULL ) return ;
+  BSTdisplayInOrder( b->sx );
+  
+
+  printf("(%d,%d)", b->x, b->y );
+  BSTdisplayInOrder( b->dx );
+
+}
+
+
 /* Creazione Albero Mosaico*/
+
 rbtree *createrbtree()
 {
 	rbtree *t = (rbtree*) malloc(sizeof(rbtree));
@@ -25,25 +171,6 @@ rbtree *createrbtree()
 	t->nil->c = black;
 	return t;
 }
-
-
-
-
-// searchtree *searchbs(searchtree *p, int k) 
-// { 
-// 	if(!p || k == p->v) 
-// 		return p; 
-// 	return searchbs(k < p->v ? p->left : p->right, k); 
-// } 
-
-// void inorderbs(searchtree *p, void (*op)(searchtree *)) { 
-// if(p) { 
-// inorderbs(p->left,op); 
-// printf("%d",p->v);
-// inorderbs(p->right,op); 
-// } 
-// } 
-
 
 
 
@@ -74,16 +201,12 @@ void inorderadv(int **grid, rbnode *p, rbnode *nil)
 }
 void visualizza_avanzata(rbtree *p)
 {	
-	// return -1 if memory error
-	
 	int **grid;
 	int ordine = p->ordine, cordx, cordy;
 	xup = p->xup;
 	xdown = p->xdown;
 	yup = p->yup;
 	ydown = p->ydown;
-	
-	// allocazione struttura disegno mosaico 
 	grid = malloc(ordine * sizeof(int *));
 	if(grid == NULL) return 1;
 	for(int i = 0; i <= ordine; i++){
@@ -164,6 +287,13 @@ void rightrotate(rbtree *r, rbnode *x)
 /* Inserimento del singolo nodo, con valorizzazione di tutti i campi del nodo */
 rbnode *simpleinsert(rbtree *tree, int x, int y)
 {
+	
+	if (BSTsearch(adm_positions,x,y)!= 1){
+		return -3;
+	}else{
+		   adm_positions = BSTdelete(adm_positions,x,y);
+	}
+	
 	rbnode *q = (rbnode*) malloc(sizeof(rbnode));
 	rbnode *r = tree->root;
 	rbnode *s = tree->nil;
@@ -215,12 +345,12 @@ rbnode *simpleinsert(rbtree *tree, int x, int y)
 	{
 		rbnode *rnode = search(tree,positions[i],positions[i+1]);
 		if (rnode){
-			// printf("trovata collisione il nodo (%d,%d) collide con (%d,%d) \n ",x,y, positions[i],positions[i+1]);
 			collisions = collisions +1;
+		}else{
+			// printf(" inserisco (%d,%d)  nelle posizion ammesse \n",positions[i],positions[i+1]);
+			adm_positions = BSTinsert( adm_positions, positions[i],positions[i+1] );
 		}
 	}
-	
-	
 	if (x<0 && x< tree->xdown) tree->xdown = x;
 	if (x>0 && x> tree->xup) tree->xup = x;
 	if (y<0 && y< tree->ydown) tree->ydown = y;
@@ -231,10 +361,13 @@ rbnode *simpleinsert(rbtree *tree, int x, int y)
 }
 
 /* Inserimento di un nuovo elemento nell'albero */
-void rbinsert(rbtree *tree, int xa, int ya)
+int rbinsert(rbtree *tree, int xa, int ya)
 {
 	rbnode *x = simpleinsert(tree, xa, ya);
+	if (x == -3)
+			return -1;
 	if (!x){
+		printf("inserendo");
 		
 	while(x != tree->root && x->up->c == red) {     /* Finchè x non è la radice e il padre è red */
 		if(x->up == x->up->up->left) {              /* Se il padre di x è uguale al figlio sinistro di suo nonno, cioè il padre di x */
@@ -341,13 +474,17 @@ FUNZIONI RICHIESTE
 
 rbtree* nuovo(){
 	rbtree* mosaico = createrbtree();
+	adm_positions = BSTinit();
 	mosaico->count = 0;
 	mosaico->xdown=0;
 	mosaico->yup=0;
 	mosaico->ydown=0;
 	mosaico->yup=0;
+	mosaico->ordine = 1;
+	adm_positions = BSTinsert( adm_positions, 0, 0 );
 	rbinsert(mosaico,0,0);
 	mosaico->perimetro = 4;
+	
 	return mosaico;
 }
 
@@ -357,6 +494,34 @@ int perimetro(rbtree *p){
 
 int ordine(rbtree* p){
 	return p->ordine;
+}
+
+void inserisci_a_caso(rbtree* p){
+	int x,y;
+	x = BSTGetRootX(adm_positions);
+	y = BSTGetRootY(adm_positions);
+	rbinsert(p,BSTGetRootX(adm_positions),BSTGetRootY(adm_positions));
+    adm_positions = BSTdelete(adm_positions,BSTGetRootX(adm_positions),BSTGetRootY(adm_positions));
+}
+
+void costruisci(rbtree* p, int* n){
+
+	for(int i = 0; i <= *n; ++i)
+	{
+		inserisci_a_caso(p);	
+	}
+	return;
+}
+
+void statistica (rbtree* p, int *n, int *k){
+	costruisci(p,&n);
+	int c = n;
+	int h = ordine(p);
+	int per = perimetro(p);
+	int a = (h * h);
+	a = h/(c);
+	int b = per / c;
+	printf(" a = %d b = %d", a,b);
 }
 /*
 
@@ -374,7 +539,6 @@ int* get_admitted_positions(int x, int y){
 	positions[5] = y;
 	positions[6] = x;
 	positions[7] = y-1;
-	
 	return positions;
 }
 int is_lower_than(int xa, int ya, int xb, int yb){
@@ -391,13 +555,3 @@ int is_lower_than(int xa, int ya, int xb, int yb){
 
 
 
-
-void inorderforTest(rbnode *p, rbnode *nil)
-{
-
-	if(p != nil) {
-        	inorderforTest(p->left,nil);
-				
-        	inorderforTest(p->right,nil);
-	}
-}

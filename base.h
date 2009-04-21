@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#define nullItem NULL
 typedef enum {red, black} colore;
 struct rbnode {
 	int x,y;
@@ -17,10 +17,22 @@ typedef struct {
 
 
 
+typedef struct BST *bst;
 
+bst BSTinit( void );                           /* inizializza un BST vuoto */
+int BSTcount( bst );                           /* conta gli elementi di un BST */
+int BSTdeep( bst  );                            /* calcola la profondità massima dell'albero */
+// bst BSTinsert( bst, item );                    /* inserisce un nuovo nodo nel BST */
+// item BSTsearch( bst, Key );                    /* cerca un record di data chiave nel BST */
+// bst BSTdelete( bst, Key );                     /* cancella un record di data chiava, se presente nel BST */
+bst BSTfree( bst );                            /* cancella tutti gli elementi dal BST */
+// void BSTsort( bst, void ( *visit )( item ) );  /* applica la funzione visit ai nodi del BST, in ordine */
+void BSTdisplay( bst );                        /* visualizza in bella forma il contenuto e la struttura del BST */
 
-
-
+struct BST {
+  int x,y;
+  struct BST *sx, *dx;
+};
 
 
 // procedure richieste
@@ -31,11 +43,9 @@ int ordine(rbtree* p);
 
 void visualizza_elementare(rbtree *p);
 
-
-
 rbtree *createrbtree();
 void stampa(rbtree *p);
-void rbinsert(rbtree *p, int x, int y);
+int rbinsert(rbtree *p, int x, int y);
 int perimetro(rbtree *p);
 int ordine(rbtree *p);
 // void rbinsert(rbtree *p, char *nome);
@@ -48,8 +58,3 @@ int is_lower_than(int xa, int ya, int xb, int yb);
 int* get_admitted_positions(int x, int y);
 
 
-///TEST STRUCTURES
-typedef struct {
-	int x;
-    int y;
-} element;
