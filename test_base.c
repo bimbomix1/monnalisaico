@@ -32,13 +32,6 @@ void should_test_bst(){
 
 
 
-
-
-
-
-
-
-
 void test_should_cretetree(){
 	rbtree *t = (rbtree*) malloc(sizeof(rbtree));
 	assert_not_equal(t,NULL);
@@ -62,6 +55,38 @@ void test_should_insert_element_and_find_it(){
 	assert_equal(3,nodo->y);
 }
 
+void test_visualizzaavanzata(){
+	rbtree *mosaico = nuovo();
+	rbinsert(mosaico,1,0);
+	rbinsert(mosaico,2,0);
+	rbinsert(mosaico,0,-1);
+	rbinsert(mosaico,-1,-1);
+	rbinsert(mosaico,-2,-1);
+		rbinsert(mosaico,-3,-1);
+		rbinsert(mosaico,-4,-1);
+	assert_equal(-1,rbinsert(mosaico,3,-1));
+	
+	
+	
+	assert_equal(8,mosaico->count);
+}
+
+void test_visualizzaavanzata2(){
+	rbtree *mosaico = nuovo();
+	assert_equal(1, mosaico->count);
+	rbinsert(mosaico,-1,0);
+	assert_equal(2, mosaico->count);
+	rbinsert(mosaico,-2,-1);
+	rbinsert(mosaico,0,0);
+	mosaico = nuovo();
+	rbinsert(mosaico,0,1);
+	rbinsert(mosaico,0,2);
+	rbinsert(mosaico,1,2);
+	rbinsert(mosaico,1,1);
+	assert_equal(5, mosaico->count);
+	assert_equal(9, BSTcount(getAdmpositions()));
+}
+
 // TDD nuovo()
 void test_get_nuovo(){
 	rbtree *mosaico = nuovo();
@@ -75,7 +100,7 @@ void test_should_insert_new_elemnt(){
 	rbinsert(mosaico,0,1);
 	rbinsert(mosaico,2,3);
 	assert_not_equal(NULL,search(mosaico,0,1));
-	assert_not_equal(NULL,search(mosaico,2,3));
+	assert_equal(NULL,search(mosaico,2,3));
 	assert_equal(NULL,search(mosaico,3,3));
 	//visualizza_elementare(mosaico);
 }
@@ -167,6 +192,12 @@ void should_get_order_from_spec(){
 	assert_equal(8,ordine(mosaico));		
 }
 
+// tdd costruisci
+
+void test_costruisci(){
+	rbtree* mosaico = nuovo();
+	}
+
 /// TEST TOOLS
 void test_admitted_positions(){
 	int* positions = get_admitted_positions(0,0);
@@ -245,20 +276,20 @@ void should_visualizza_avanzata(){
 
 int main(int argc, char **argv) {
     TestSuite *suite = create_test_suite();
-	
-	    add_test(suite, test_should_cretetree);
-	add_test(suite, test_should_insert_new_elemnt);
-	 add_test(suite, test_should_order);
-	add_test(suite, test_should_not_insert_same_item);
-	add_test(suite,test_should_get_perimetro);
-		add_test(suite, test_admitted_positions);
-	add_test(suite,should_get_order_from_spec);
-	add_test(suite, should_get_order);
-	add_test(suite, test_get_nuovo);
-	add_test(suite,should_test_bst);
-	add_test(suite,should_visualizza_avanzata);
-	add_test(suite, test_should_get_perimetro_with_spec_example);
-
-
-    return run_test_suite(suite, create_text_reporter());
+	// add_test(suite, test_should_cretetree);
+	// add_test(suite, test_should_insert_new_elemnt);
+	// add_test(suite, test_should_order);
+	// add_test(suite, test_should_not_insert_same_item);
+	// add_test(suite,test_should_get_perimetro);
+	// add_test(suite, test_admitted_positions);
+	// add_test(suite,should_get_order_from_spec);
+	// add_test(suite, should_get_order);
+	// add_test(suite, test_get_nuovo);
+	// add_test(suite,should_test_bst);
+	// add_test(suite,should_visualizza_avanzata);
+	// add_test(suite, test_should_get_perimetro_with_spec_example);
+    // add_test(suite, test_costruisci);
+	add_test(suite,test_visualizzaavanzata);
+	add_test(suite,test_visualizzaavanzata2);
+	return run_test_suite(suite, create_text_reporter());
 }
